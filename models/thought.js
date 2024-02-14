@@ -1,12 +1,12 @@
-const { Schema, model } = require('mongoose')
+const { Schema, Model } = require('mongoose')
 
 const thoughtSchema = new Schema(
     {
         thoughtText: {
             type: String,
             required: true,
-            min: 1,
-            max: 280,
+            minLength: 1,
+            maxLength: 280,
         },
         createdAt: {
             type: Date,
@@ -16,10 +16,18 @@ const thoughtSchema = new Schema(
             type: String,
             required: true,
         },
-        reactions: {
-
-            // must be completed from other model
-
-        }
+        reactions:[reactionSchema],
     }
-)
+);
+
+thoughtSchema.virtual('reactionCount').get(function() {
+    return this.reactions.length;
+});
+
+thoughtSchema.virtual('formattedCreatedAt').get(function () {
+    return this.createdAt.toLocaleString();
+});
+
+const Thought = Model('Thought', thoughtSchema)
+
+module.exports = { Thought }
