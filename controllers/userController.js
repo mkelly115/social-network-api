@@ -1,4 +1,4 @@
-const { User } = require('../../models');
+const { User } = require('../models');
 
 module.exports = {
     async getUsers(req, res) {
@@ -59,4 +59,53 @@ module.exports = {
             res.status(404).json({ message: 'No user associated with this ID' });
         }
     },
+    async addFriend(req, res) {
+        try {
+            const user = await User.findById(req.params.userId); 
+            if (!user) {
+                return res.status(404).json({ message: 'No user associated with this ID' });
+            }
+    
+            const friendId = req.body.friendId; 
+            const friend = await User.findById(friendId);
+            if (!friend) {
+                return res.status(404).json({ message: 'No friend associated with this ID' });
+            }
+
+            user.friends.push(friend);
+    
+            await user.save();
+    
+            res.json(user);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    },
+    async deleteFriend(req, res) {
+        try {
+            const user = await User.findById(req.params.userId);
+            if (!user) {
+                return res.status(404).json({ message: 'No user associated with this ID' });
+            }
+
+            const friendId = req.params.friendId; // Assuming friendId is passed in the URL parameters
+            const friendIndex = user.friends.indexOf(friendId);
+
+            if (friendIndex === -1) {
+                return res.status(404).json({ message: 'Friend not found in the user\'s friend list' });
+            }
+
+            // Remove the friend from the user's friends list
+            user.friends.splice(friendIndex, 1);
+
+            // Save the updated user
+            await user.save();
+
+            res.json(user);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
 };
