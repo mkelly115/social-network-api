@@ -10,13 +10,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', routes);
 
 mongoose.connect('mongodb://localhost/social-network-api', {
-  useFindAndModify: false,
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-mongoose.set('useCreateIndex', true);
+mongoose.connection.on('connected', () => {
+  console.log('Connected to MongoDB');
+});
+
+mongoose.connection.on('error', (error) => {
+  console.error('Error connecting to MongoDB:', error.message);
+});
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
