@@ -24,10 +24,8 @@ module.exports = {
         try {
             const { thoughtText, username, userId } = req.body;
 
-            // Create a new thought
             const thought = await Thought.create({ thoughtText, username });
 
-            // Push the created thought's _id to the associated user's thoughts array
             const user = await User.findByIdAndUpdate(
                 userId,
                 { $push: { thoughts: thought._id } },
@@ -61,5 +59,47 @@ module.exports = {
         } catch (err) {
             res.status(404).json({ message: 'No associated thought with this Id'})
         }
-    }
+    },
+    async createReaction(req, res) {
+        try {
+            const { reactionBody, userName } = req.body;
+            const { thoughtId } = req.params;
+
+            const reaction = {
+                reactionBody,
+                userName,
+            };
+
+            // Create a new reaction and push it to the thought's reactions array
+            const updatedThought = await Thought.findByIdAndUpdate(
+                thoughtId,
+                { $push: { reactions: reaction } },
+                { new: true }
+            );
+
+            res.json(updatedThought);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    },
+
+    async deleteReaction(req, res) {
+        try {
+            const { thoughtId, reactionId } = req.params;
+
+            // Pull and remove the reaction by the reactionId from the thought's reactions array
+            const updatedThought = await Thought.findByIdAndUpdate(
+                thoughtId,
+                { $pull: { reactions: { reactionId } } },
+                { new: true }
+            );
+
+            res.json(updatedThought);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    },
 };
+
