@@ -66,7 +66,7 @@ module.exports = {
                 return res.status(404).json({ message: 'No user associated with this ID' });
             }
     
-            const friendId = req.body.friendId; 
+            const friendId = req.params.friendId; 
             const friend = await User.findById(friendId);
             if (!friend) {
                 return res.status(404).json({ message: 'No friend associated with this ID' });
@@ -89,17 +89,15 @@ module.exports = {
                 return res.status(404).json({ message: 'No user associated with this ID' });
             }
 
-            const friendId = req.params.friendId; // Assuming friendId is passed in the URL parameters
+            const friendId = req.params.friendId; 
             const friendIndex = user.friends.indexOf(friendId);
 
             if (friendIndex === -1) {
                 return res.status(404).json({ message: 'Friend not found in the user\'s friend list' });
             }
 
-            // Remove the friend from the user's friends list
             user.friends.splice(friendIndex, 1);
 
-            // Save the updated user
             await user.save();
 
             res.json(user);

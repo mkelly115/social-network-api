@@ -1,10 +1,11 @@
 const { Thought, reactionSchema } = require('../models');
+const { User } = require('../models/user');
 
 module.exports = {
     async getThoughts(req, res) {
         try {
             const thoughts = await Thought.find({}).select('-__v');
-            resizeBy.json(thoughts);
+            res.json(thoughts);
         } catch (err) {
             res.status(500).json(err);
         }
@@ -14,17 +15,17 @@ module.exports = {
             const thought = await Thought.findOne({_id: req.params.thoughtId}).select('-__v');
             
             !thought
-                ? resizeBy.status(404).json({message: 'No thought is associated with this Id'})
-                : resizeBy.json(thought);
+                ? res.status(404).json({message: 'No thought is associated with this Id'})
+                : res.json(thought);
             } catch (err) {
                 res.status(500).json(err);
             }
     },
     async createThought(req, res) {
         try {
-            const { thoughtText, username, userId } = req.body;
+            const { thoughtText, userName, userId } = req.body;
 
-            const thought = await Thought.create({ thoughtText, username });
+            const thought = await Thought.create({ thoughtText, userName });
 
             const user = await User.findByIdAndUpdate(
                 userId,
@@ -70,7 +71,6 @@ module.exports = {
                 userName,
             };
 
-            // Create a new reaction and push it to the thought's reactions array
             const updatedThought = await Thought.findByIdAndUpdate(
                 thoughtId,
                 { $push: { reactions: reaction } },
@@ -88,7 +88,6 @@ module.exports = {
         try {
             const { thoughtId, reactionId } = req.params;
 
-            // Pull and remove the reaction by the reactionId from the thought's reactions array
             const updatedThought = await Thought.findByIdAndUpdate(
                 thoughtId,
                 { $pull: { reactions: { reactionId } } },
